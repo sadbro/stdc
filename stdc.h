@@ -1,11 +1,14 @@
 #ifndef STDC_H
 #define STDC_H
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <assert.h>
+#include <stdarg.h>
 
+// VECTOR
 size_t VEC_LIMIT = 1;
 void limit(){ VEC_LIMIT++; }
 void set_limit(size_t n){ VEC_LIMIT = n; }
@@ -71,6 +74,8 @@ short equal_str(char* a, char* b){ return !strcmp(a, b); }
     } while(0);                         \
 }                                       \
 
+// SET
+
 #define P 53.0
 #define M ((int)1e5+9)
 
@@ -115,6 +120,8 @@ void outerr_int(int key) { outerr_backend("%d", key); }
     } while(0);                         \
 }                                       \
 
+// MAP
+
 #define MAP(key_type, value_type) struct { key_type keys[M];value_type values[M];int exists[M];size_t size; }
 
 #define map_get(map, key, dst){                         \
@@ -147,7 +154,9 @@ void outerr_int(int key) { outerr_backend("%d", key); }
 
 // TODO: mapping possible in str->int, int->int yet. make it truly customisable
 
-#define HMAP_TYPES(key, value) typedef MAP(key, value) HashMap
+#define SET_MAP_TYPES(key, value) typedef MAP(key, value) HashMap
+
+// STACK
 
 typedef struct {
 
@@ -196,6 +205,8 @@ int stack_peek(Stack* _addr){
     return _addr->backend[_addr->length-1];
 }
 
+// STACK
+
 typedef struct NODE {
 
     int value;
@@ -233,6 +244,244 @@ void TREE_FREE(Tree* tree){
 void set_tree(Tree* tree, int* values, int n){
 
     for(int i=0; i<n; i++){ tree->children[i]->value = values[i]; }
+}
+
+// MATRIX
+
+typedef struct {
+
+    size_t rows;
+    size_t cols;
+    size_t stride;
+    int* start;
+
+} Matrix;
+
+Matrix MATRIX(size_t rows, size_t cols, float _default){
+
+    Matrix m;
+    m.rows = rows;
+    m.cols = cols;
+    m.start = malloc(sizeof(int) * rows * cols);
+
+    for(size_t i=0; i<rows*cols; i++){ m.start[i] = _default; }
+
+    assert(m.start != NULL);
+    return m;
+}
+
+#define MAT_AT(m, i, j) (m).start[(i)*(m).cols + (j)]
+
+Matrix identity_matrix(size_t order){
+
+    Matrix m = MATRIX(order, order, 0);
+    for(size_t i=0; i<m.rows; i++){
+
+        for(size_t j=0; j<m.cols; j++){
+
+            if(i == j){ MAT_AT(m, i, j) += 1; }
+        }
+    }
+
+    return m;
+}
+
+#define MATRIX_PRINT(m) print_mat(m, #m)
+
+#define matrix_fill(matrix, value) randomise(matrix, value, value)
+
+Matrix matrix_row_loc(Matrix m, size_t row_start, size_t row_end){
+
+    assert( row_end <= m.rows );
+    assert( row_end > row_start );
+
+    size_t nrows = row_end - row_start;
+
+    return (Matrix){
+
+        .rows = nrows,
+        .cols = m.cols,
+        .start = &MAT_AT(m, row_start, 0)
+    };
+}
+
+Matrix matrix_col_loc(Matrix m, size_t col_start, size_t col_end){
+
+    assert( col_end <= m.cols );
+    assert( col_end > col_start );
+
+    size_t ncols = col_end - col_start;
+
+    Matrix result = MATRIX(m.rows, ncols, 0.0f);
+
+    for (size_t i=0; i<result.rows; i++){
+
+        for (size_t j=0; j<result.cols; j++){
+
+            MAT_AT(result, i, j) = MAT_AT(m, i, col_start + j);
+        }
+    }
+
+    return result;
+}
+
+void matrix_sum(Matrix dst, Matrix src){
+
+    assert((dst.rows == src.rows) && (dst.cols == src.cols));
+
+    for(size_t i=0; i<dst.rows; i++){
+
+        for(size_t j=0; j<dst.cols; j++){
+
+            MAT_AT(dst, i, j) += MAT_AT(src, i, j);
+        }
+    }
+}
+
+void matrix_dot(Matrix dst, Matrix a, Matrix b){
+
+    assert(a.cols == b.rows);
+    assert((dst.rows == a.rows) && (dst.cols == b.cols));
+    size_t n = a.cols;
+
+    for(size_t i=0; i<dst.rows; i++){
+
+        for(size_t j=0; j<dst.cols; j++){
+
+            MAT_AT(dst, i, j) = 0.0f;
+            for(size_t k=0; k<n; k++){
+
+                MAT_AT(dst, i, j) += MAT_AT(a, i, k) * MAT_AT(b, k, j);
+            }
+        }
+    }
+}
+
+void matrix_copy(Matrix dst, Matrix src){
+
+    assert( (dst.cols == src.cols) && (dst.rows == src.rows) );
+
+    for (size_t i=0; i<dst.rows; i++){
+
+        for (size_t j=0; j<dst.cols; j++){
+
+            MAT_AT(dst, i, j) = MAT_AT(src, i, j);
+        }
+    }
+}
+
+// LINKED LIST FOR INT
+
+typedef struct LL_PROTOTYPE {
+
+    int value;
+    struct LL_PROTOTYPE* next;
+
+} LinkedList_INT;
+
+#define NODE(value) (LinkedList_INT){ .value=value, .next=NULL }
+
+LinkedList_INT* Node(int value){
+
+    LinkedList_INT* node = (LinkedList_INT*)malloc( sizeof(LinkedList_INT) );
+    node->value = value;
+    node->next = NULL;
+    return node;
+}
+
+void LL_FREE(LinkedList_INT* head){
+
+    LinkedList_INT* current = {0};
+    while( head != NULL ){
+
+        current = head;
+        head = head->next;
+        free(current);
+    }
+}
+
+int ll_getLength(LinkedList_INT* current){
+
+    int count = 0;
+    while (current != NULL){ count++;current = current->next; }
+
+    return count;
+}
+
+void ll_traversefn(LinkedList_INT* _addr, void(*function)(LinkedList_INT*, va_list), ...){
+
+    va_list argv;
+    va_start(argv, function);
+
+    LinkedList_INT* intermediate = _addr;
+    while (intermediate != NULL){
+
+        function(intermediate, argv);
+        intermediate = intermediate->next;
+    }
+
+    va_end(argv);
+};
+
+void out_prototype(LinkedList_INT* _, va_list argv){(void)argv;printf("{ value = %d }->", _->value);}
+
+#define LL_PRINT out_prototype
+
+void ll_append(LinkedList_INT* current, int value){
+
+    LinkedList_INT* _new = Node(value);
+
+    while (current->next != NULL){current = current->next;}
+
+    current->next = _new;
+}
+
+void ll_insert(LinkedList_INT** _addr, int value, int index){
+
+    assert( index <= ll_getLength(*_addr) );
+
+    LinkedList_INT* new_node = Node(value);
+    LinkedList_INT* head = *_addr;
+
+    if (index == 0){ new_node->next = head;*_addr = new_node;return; }
+
+    while(--index){head = head->next;}
+
+    LinkedList_INT* RLL = head->next;
+    head->next = new_node;
+    new_node->next = RLL;
+}
+
+int ll_in(int value, LinkedList_INT* head){
+
+    while( head != NULL ){
+
+        if (head->value == value) { return 1;}
+        head = head->next;
+    }
+
+    return 0;
+}
+
+void ll_delete(LinkedList_INT** _addr, int value){
+
+    assert(ll_in(value, *_addr));
+
+    LinkedList_INT* current = *_addr;
+    LinkedList_INT* old_node = {0};
+    if (current->value == value){
+
+        old_node = current;
+        *_addr = current->next;
+        free(old_node);
+        return;
+    }
+
+    while(current->next->value != value){current = current->next;}
+
+    old_node = current->next;
+    current->next = current->next->next;
+    free(old_node);
 }
 
 #endif // STDC_H
