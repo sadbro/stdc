@@ -10,10 +10,10 @@
 
 size_t hash_str(char* string){
 
-    double __hash = 0;
-    for (size_t i=0;i<strlen(string);i++){ __hash += ((double)(string[i] - 'a' + 1)) * (pow(P, (double)i)); }
+    double _hash = 0;
+    for (size_t i=0;i<strlen(string);i++){ _hash += ((double)(string[i] - 'a' + 1)) * (pow(P, (double)i)); }
 
-    return ((int)__hash) % ((int)M);
+    return ((int)_hash) % ((int)M);
 }
 
 size_t hash_int(int key){

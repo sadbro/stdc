@@ -124,5 +124,34 @@ void matrix_copy(Matrix dst, Matrix src){
     }
 }
 
+int _(float a){ return (int)a; }
+
+void matrix_print_replace(Matrix m, const char* delimiter, int (*replacer)(float)){
+
+    for (size_t i = 0; i < m.rows; ++i) {
+
+        for (size_t j = 0; j < m.cols -1; ++j) {
+
+            printf("%d%s", replacer(MAT_AT(m, i, j)), delimiter);
+        }
+        printf("%d\n", replacer(MAT_AT(m, i, m.cols -1)));
+    }
+}
+
+void matrix_print(Matrix m, const char* delimiter){ matrix_print_replace(m, delimiter, _); }
+
+void matrix_fprint_replace(FILE* stream, Matrix m, const char* delimiter, int (*replacer)(float)){
+
+    for (size_t i = 0; i < m.rows; ++i) {
+
+        for (size_t j = 0; j < m.cols -1; ++j) {
+
+            fprintf(stream, "%d%s", replacer(MAT_AT(m, i, j)), delimiter);
+        }
+        fprintf(stream, "%d\n", replacer(MAT_AT(m, i, m.cols -1)));
+    }
+}
+
+void matrix_fprint(FILE* stream, Matrix m, const char* delimiter){ matrix_fprint_replace(stream, m, delimiter, _); }
 
 #endif // MATRIX_H

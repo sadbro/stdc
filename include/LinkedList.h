@@ -69,7 +69,7 @@ int ll_in(int value, LinkedList_INT* head){
 
     while( head != NULL ){
 
-        if (head->value == value) { return 1;}
+        if (head->value == value) { return 1; }
         head = head->next;
     }
 

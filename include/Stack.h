@@ -31,7 +31,7 @@ void STACK_FREE(Stack* _addr){
     free(_addr);
 }
 
-int stack_isEmpty(Stack* _addr){ return (_addr->length == 0); }
+int stack_isEmpty(Stack* _addr){ return ((_addr)->length == 0); }
 
 void stack_push(Stack* _addr, int value){
 

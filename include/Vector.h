@@ -10,8 +10,8 @@ size_t MAX = 1;
 void limit(){ MAX++; }
 void set_limit(size_t n){ MAX = n; }
 
-short equal_ll(long long a, long long b){ return a == b; }
-short equal_str(char* a, char* b){ return !strcmp(a, b); }
+short equal_ll(long long a, long long b){ return (short)((a) == (b)); }
+short equal_str(char* a, char* b){ return (short)!strcmp((a), (b)); }
 
 #define equal(a, b) _Generic((a), int:equal_ll, long:equal_ll, long long:equal_ll, char*:equal_str)(a, b)
 
