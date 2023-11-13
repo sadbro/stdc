@@ -1,2 +1,6 @@
 tests/
 *.exe
+/.idea/.gitignore
+/.idea/modules.xml
+/.idea/stdc.iml
+/.idea/vcs.xml
