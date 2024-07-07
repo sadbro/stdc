@@ -6,14 +6,13 @@
 #include <math.h>
 
 #define P 53.0
-#define M ((int)1e5+9)
 
 size_t map_hash_str(char* string){
 
     double _hash = 0;
     for (size_t i=0;i<strlen(string);i++){ _hash += ((double)(string[i] - 'a' + 1)) * (pow(P, (double)i)); }
 
-    return ((int)_hash) % ((int)M);
+    return ((int)_hash) % ((int)INT_MAX);
 }
 
 size_t map_hash_int(int key){
@@ -29,7 +28,7 @@ void map_outerr_int(int key) { outerr_backend("%d", key); }
 #define hash(key) _Generic((key), char*:map_hash_str, int: map_hash_int)(key)
 #endif
 
-#define MAP(key_type, value_type) struct { key_type keys[M];value_type values[M];int exists[M];size_t size; }
+#define MAP(key_type, value_type) struct { key_type keys[INT_MAX];value_type values[INT_MAX];int exists[INT_MAX];size_t size; }
 
 #define map_outerr(key) _Generic((key), char*:map_outerr_str, int: map_outerr_int)(key)
 

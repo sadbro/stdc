@@ -9,7 +9,7 @@ typedef struct {
     size_t rows;
     size_t cols;
     size_t stride;
-    int* start;
+    float* start;
 
 } Matrix;
 
@@ -124,34 +124,29 @@ void matrix_copy(Matrix dst, Matrix src){
     }
 }
 
-int _(float a){ return (int)a; }
-
-void matrix_print_replace(Matrix m, const char* delimiter, int (*replacer)(float)){
+void matrix_print(Matrix m, const char* delimiter){
 
     for (size_t i = 0; i < m.rows; ++i) {
 
         for (size_t j = 0; j < m.cols -1; ++j) {
 
-            printf("%d%s", replacer(MAT_AT(m, i, j)), delimiter);
+            printf("%f%s", MAT_AT(m, i, j), delimiter);
         }
-        printf("%d\n", replacer(MAT_AT(m, i, m.cols -1)));
+        printf("%f\n", MAT_AT(m, i, m.cols -1));
     }
 }
 
-void matrix_print(Matrix m, const char* delimiter){ matrix_print_replace(m, delimiter, _); }
-
-void matrix_fprint_replace(FILE* stream, Matrix m, const char* delimiter, int (*replacer)(float)){
+void matrix_fprint(FILE* stream, Matrix m, const char* delimiter){
 
     for (size_t i = 0; i < m.rows; ++i) {
 
         for (size_t j = 0; j < m.cols -1; ++j) {
 
-            fprintf(stream, "%d%s", replacer(MAT_AT(m, i, j)), delimiter);
+            fprintf(stream, "%f%s", MAT_AT(m, i, j), delimiter);
         }
-        fprintf(stream, "%d\n", replacer(MAT_AT(m, i, m.cols -1)));
+        fprintf(stream, "%f\n", MAT_AT(m, i, m.cols -1));
     }
 }
 
-void matrix_fprint(FILE* stream, Matrix m, const char* delimiter){ matrix_fprint_replace(stream, m, delimiter, _); }
 
 #endif // MATRIX_H

@@ -6,14 +6,13 @@
 #include <string.h>
 
 #define P 53.0
-#define M ((int)1e5+9)
 
 size_t hash_str(char* string){
 
     double _hash = 0;
     for (size_t i=0;i<strlen(string);i++){ _hash += ((double)(string[i] - 'a' + 1)) * (pow(P, (double)i)); }
 
-    return ((int)_hash) % ((int)M);
+    return ((int)_hash) % ((int)INT_MAX);
 }
 
 size_t hash_int(int key){
@@ -29,7 +28,7 @@ void outerr_int(int key) { outerr_backend("%d", key); }
 #define hash(key) _Generic((key), char*:hash_str, int: hash_int)(key)
 #endif
 
-#define SET(key_type) struct { key_type keys[M];int exists[M];size_t size; }
+#define SET(key_type) struct { key_type keys[INT_MAX];int exists[INT_MAX];size_t size; }
 
 #define outerr(key) _Generic((key), char*:outerr_str, int: outerr_int)(key)
 
