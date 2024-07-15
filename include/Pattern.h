@@ -1,4 +1,4 @@
-// Inspired by tsoding
+// Inspired by tsoding -> https://www.youtube.com/@TsodingDaily -> https://www.youtube.com/watch?v=B2VS_zeuTQ4
 // TODO: To be self implemented later
 
 #include <stdbool.h>
