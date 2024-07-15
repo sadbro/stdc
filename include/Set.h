@@ -21,8 +21,8 @@ size_t hash_int(int key){
 }
 
 #define outerr_backend(fmt, key) fprintf(stderr, "KeyError: `"fmt"` does not exist as a key.", key);exit(1);
-void outerr_str(char* key) { outerr_backend("%s", key); }
-void outerr_int(int key) { outerr_backend("%d", key); }
+void outerr_str(char* key) { outerr_backend("%s", key) }
+void outerr_int(int key) { outerr_backend("%d", key) }
 
 #ifndef hash
 #define hash(key) _Generic((key), char*:hash_str, int: hash_int)(key)

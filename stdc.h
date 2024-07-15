@@ -15,5 +15,6 @@
 #include "include/Stack.h"
 #include "include/Tree.h"
 #include "include/Vector.h"
+#include "include/Pattern.h"
 
 #endif // STDC_H
