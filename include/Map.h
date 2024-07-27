@@ -21,8 +21,8 @@ size_t map_hash_int(int key){
 }
 
 #define map_outerr_backend(fmt, key) fprintf(stderr, "KeyError: `"fmt"` does not exist as a key.", key);exit(1);
-void map_outerr_str(char* key) { outerr_backend("%s", key); }
-void map_outerr_int(int key) { outerr_backend("%d", key); }
+void map_outerr_str(char* key) { map_outerr_backend("%s", key); }
+void map_outerr_int(int key) { map_outerr_backend("%d", key); }
 
 #ifndef hash
 #define hash(key) _Generic((key), char*:map_hash_str, int: map_hash_int)(key)
