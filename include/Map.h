@@ -62,6 +62,6 @@ void map_outerr_int(int key) { map_outerr_backend("%d", key); }
 
 // TODO: mapping possible in str->int, int->int yet. make it truly customisable
 
-#define MAP_TYPES(key, value) typedef MAP(key, value)
+#define SET_MAP_TYPE(key, value) typedef MAP(key, value)
 
 #endif // MAP_H
