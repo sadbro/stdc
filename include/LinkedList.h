@@ -31,9 +31,10 @@ void LL_FREE(LinkedList_INT* head){
         head = head->next;
         free(current);
     }
+    free(head);
 }
 
-int ll_length(LinkedList_INT* current){
+int length_of_linked_list(LinkedList_INT* current){
 
     int count = 0;
     while (current != NULL){ count++;current = current->next; }
@@ -51,7 +52,7 @@ void ll_append(LinkedList_INT* current, int value){
 
 void ll_insert(LinkedList_INT** _addr, int value, int index){
 
-    assert( index <= ll_length(*_addr) );
+    assert( index <= length_of_linked_list(*_addr) );
 
     LinkedList_INT* new_node = Node(value);
     LinkedList_INT* head = *_addr;
