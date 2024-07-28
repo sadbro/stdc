@@ -1,4 +1,5 @@
 tests/
+inputs/
 *.exe
 /.idea/.gitignore
 /.idea/modules.xml
