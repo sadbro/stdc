@@ -46,7 +46,7 @@ short equal_str(char* a, char* b){ return (short)!strcmp((a), (b)); }
     } while(0);                                                             \
 }                                                                           \
 
-#define length(vv) vv->size
+#define length_of_vector(vv) vv->size
 #define at(vv, i) vv->data[i]
 
 #define vector_erase(vv, value){                                            \
