@@ -1,7 +1,7 @@
 #ifndef STRING_H
 #define STRING_H
 
-// inspired from: https://www.youtube.com/watch?v=WhCbTFBB5Qc
+// inspired from Dr Jonas Birch : https://www.youtube.com/watch?v=WhCbTFBB5Qc
 
 #include <stdio.h>
 #include <unistd.h>
