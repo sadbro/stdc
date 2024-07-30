@@ -18,4 +18,9 @@
 #include "include/Pattern.h"
 #include "include/String.h"
 
+#define length(x) _Generic((x),             \
+    String: length_of_String,               \
+    LinkedList_INT: length_of_linked_list   \
+)(x)
+
 #endif // STDC_H

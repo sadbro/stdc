@@ -34,7 +34,7 @@ void LL_FREE(LinkedList_INT* head){
     free(head);
 }
 
-int length_of_linked_list(LinkedList_INT* current){
+unsigned int length_of_linked_list(LinkedList_INT* current){
 
     int count = 0;
     while (current != NULL){ count++;current = current->next; }
