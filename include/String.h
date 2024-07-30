@@ -127,6 +127,51 @@ static inline bool is_alphanumeric(struct s_string* string){
     return true;
 }
 
+static inline void convert_to_uppercase(struct s_string* string){
+    unsigned int i = 0, gap = 'a' - 'A';
+    while((string)->data[i] != '\0'){
+        const char current = (string)->data[i];
+        assert(is_printable_ascii(current) && "[ERR] Non printable character encountered");
+        if ((current >= 'a') && (current <= 'z')){
+            (string)->data[i] = (char)((unsigned int)(string)->data[i] - gap);
+        }
+        i++;
+    }
+}
+
+static inline void convert_to_lowercase(struct s_string* string){
+    unsigned int i = 0, gap = 'a' - 'A';
+    while((string)->data[i] != '\0'){
+        const char current = (string)->data[i];
+        assert(is_printable_ascii(current) && "[ERR] Non printable character encountered");
+        if ((current >= 'A') && (current <= 'Z')){
+            (string)->data[i] = (char)((unsigned int)(string)->data[i] + gap);
+        }
+        i++;
+    }
+}
+
+static inline void convert_to_capitalcase(struct s_string* string){
+    unsigned int gap = 'a' - 'A', i = 1, n = (string)->count;
+    const char start = (string)->data[0];
+    if ((start >= 'A') && (start <= 'Z')) {
+        (string)->data[0] = (char)((unsigned int)(string)->data[0] + gap);
+    } else if ((start >= 'a') && (start <= 'z')) {
+        (string)->data[0] = (char)((unsigned int)(string)->data[0] - gap);
+    }
+    for (;i < n; i++){
+        const char current = (string)->data[i];
+        const char previous = (string)->data[i-1];
+        if (((previous < 'A') || (previous > 'Z')) && ((previous < 'a') || (previous > 'z'))){
+            if ((current >= 'A') && (current <= 'Z')){
+                (string)->data[i] = (char)((unsigned int)(string)->data[i] + gap);
+            } else if ((current >= 'a') && (current <= 'z')) {
+                (string)->data[i] = (char)((unsigned int)(string)->data[i] - gap);
+            }
+        }
+    }
+}
+
 void trim_char_from_left(struct s_string* string, const char delimiter){
     unsigned int i = -1;
     while(((string)->data[++i] == delimiter) && (string)->count){
