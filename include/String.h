@@ -10,6 +10,8 @@
 #include <assert.h>
 #include <errno.h>
 
+#include "Hashes.h"
+
 struct s_string {
     unsigned int count;
     char data[0];
@@ -61,6 +63,11 @@ bool concat_string(struct s_string* dst, const char* src){
     copy(p->data + p->count, src, n);
     p->count += n;
     return true;
+}
+
+unsigned long apply_hash(struct s_string* str, HASH_API_STRING _hash){
+    assert((str)->data[(str)->count] == '\0' && "[ERR]: Non null terminating data found");
+    return _hash((str)->data);
 }
 
 bool equals_string(struct s_string* a, const char* b){
