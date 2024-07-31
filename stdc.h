@@ -17,6 +17,7 @@
 #include "include/Vector.h"
 #include "include/Pattern.h"
 #include "include/String.h"
+#include "include/Hashes.h"
 
 #define length(x) _Generic((x),             \
     String: length_of_String,               \
