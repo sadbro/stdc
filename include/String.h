@@ -10,8 +10,6 @@
 #include <assert.h>
 #include <errno.h>
 
-#include "Hashes.h"
-
 struct s_string {
     unsigned int count;
     char data[0];
