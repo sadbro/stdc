@@ -10,6 +10,8 @@
 #include <assert.h>
 #include <errno.h>
 
+#include "Hashes.h"
+
 struct s_string {
     unsigned int count;
     char data[0];
@@ -41,12 +43,49 @@ unsigned int length_of_string(const char* str){
     return _n;
 }
 
+int* get_lps_table(const char* pattern){
+    unsigned int n = length_of_string(pattern);
+    int* lps_table = (int*)calloc(n, sizeof(int));
+    int len = 0;
+    lps_table[0] = 0;
+    int i = 1;
+    while (i < n) {
+        if (pattern[i] == pattern[len]) {
+            len++;
+            lps_table[i] = len;
+            i++;
+        }
+        else {
+            if (len != 0) {
+                len = lps_table[len - 1];
+            }
+            else {
+                lps_table[i] = 0;
+                i++;
+            }
+        }
+    }
+    return lps_table;
+}
+
 struct s_string* from_string(const char* str){
     unsigned int size = length_of_string(str) + 1 + sizeof(struct s_string), n = length_of_string(str);
     struct s_string* p = (struct s_string*) calloc(1, size);
     assert(p);
     p->count = n;
     copy(p->data, str, n);
+    return p;
+}
+
+struct s_string* get_owned_substring(struct s_string* string, unsigned int start, unsigned int end){
+    unsigned int n = length_of_String(string);
+    assert(end < n && "[ERR]: Invalid Substring length.");
+    unsigned int substring_length = end - start;
+    struct s_string* p = (struct s_string*)calloc(1, substring_length + 1 + sizeof(struct s_string));
+    assert(p);
+    p->count = substring_length;
+    copy(p->data, (string)->data + start, substring_length);
+    p->data[p->count] = '\0';
     return p;
 }
 
@@ -61,11 +100,6 @@ bool concat_string(struct s_string* dst, const char* src){
     copy(p->data + p->count, src, n);
     p->count += n;
     return true;
-}
-
-unsigned long apply_hash(struct s_string* str, HASH_API_STRING _hash){
-    assert((str)->data[(str)->count] == '\0' && "[ERR]: Non null terminating data found");
-    return _hash((str)->data);
 }
 
 bool equals_string(struct s_string* a, const char* b){
@@ -86,6 +120,113 @@ static inline bool equals(struct s_string* a, struct s_string* b){
         return false;
     }
     return equals_string((a), (b)->data);
+}
+
+static inline bool equals_for_n(struct s_string* a, const char* b, unsigned int n){
+    for(unsigned int i = 0; i < n; i++){
+        if (a->data[i] != b[i]){
+            return false;
+        }
+    }
+    return true;
+}
+
+bool contains_single(struct s_string* haystack, const char needle){
+    unsigned int n = (haystack)->count;
+    assert((haystack)->data[(haystack)->count] == '\0' && ((haystack)->count >= 0) && "[ERR]: Non null terminating data found");
+    for (unsigned int i = 0; i < n; i++){
+        if ((haystack)->data[i] == needle){
+            return true;
+        }
+    }
+    return false;
+}
+
+unsigned int count_single(struct s_string* haystack, const char needle){
+    unsigned int n = (haystack)->count, c = 0;
+    assert((haystack)->data[(haystack)->count] == '\0' && ((haystack)->count >= 0) && "[ERR]: Non null terminating data found");
+    for (unsigned int i = 0; i < n; i++){
+        if ((haystack)->data[i] == needle){
+            c++;
+        }
+    }
+    return c;
+}
+
+bool contains_string(struct s_string* haystack, const char* needle){
+    unsigned int n = length_of_String(haystack), l = length_of_string(needle);
+    assert(n >= l && "[ERR]: Invalid needle string length.");
+    if (n == l){
+        return equals_string(haystack, needle);
+    } else {
+        int* lps = get_lps_table(needle);
+        int i = 0, j = 0;
+        while ((n - i) >= (l - j)) {
+            if (needle[j] == (haystack)->data[i]) {
+                j++;
+                i++;
+            }
+            if (j == l) {
+                free(lps);
+                return true;
+            }
+            else if ((i < n) && (needle[j] != (haystack)->data[i])) {
+                if (j != 0){
+                    j = lps[j - 1];
+                }
+                else {
+                    i++;
+                }
+            }
+        }
+        free(lps);
+        return false;
+    }
+}
+
+int find_single(struct s_string* haystack, const char needle){
+    unsigned int n = (haystack)->count;
+    assert((haystack)->data[(haystack)->count] == '\0' && ((haystack)->count >= 0) && "[ERR]: Non null terminating data found");
+    for (unsigned int i = 0; i < n; i++){
+        if ((haystack)->data[i] == needle){
+            return (int)i;
+        }
+    }
+    return -1;
+}
+
+int find_string(struct s_string* haystack, const char* needle){
+    unsigned int n = length_of_String(haystack), l = length_of_string(needle);
+    assert(n >= l && "[ERR]: Invalid needle string length.");
+    if (n == l){
+        return equals_string(haystack, needle);
+    } else {
+        int* lps = get_lps_table(needle);
+        int i = 0, j = 0;
+        while ((n - i) >= (l - j)) {
+            if (needle[j] == (haystack)->data[i]) {
+                j++;
+                i++;
+            }
+            if (j == l) {
+                free(lps);
+                return i - j;
+            }
+            else if ((i < n) && (needle[j] != (haystack)->data[i])) {
+                if (j != 0)
+                    j = lps[j - 1];
+                else
+                    i++;
+            }
+        }
+        free(lps);
+        return -1;
+    }
+}
+
+unsigned long apply_hash(struct s_string* str, HASH_API_STRING _hash){
+    assert((str)->data[(str)->count] == '\0' && ((str)->count >= 0) && "[ERR]: Non null terminating data found");
+    return _hash((str)->data);
 }
 
 static inline bool is_single(struct s_string* string){
@@ -198,6 +339,25 @@ void trim_char_from_right(struct s_string* string, const char delimiter){
 static inline void trim_char(struct s_string* string, const char delimiter){
     trim_char_from_right(string, delimiter);
     trim_char_from_left(string, delimiter);
+}
+
+static inline bool has_prefix_string(struct s_string* string, const char* predicate){
+    unsigned int check_length = length_of_string(predicate);
+    assert((string)->count >= check_length && "[ERR]: Invalid Prefix length.");
+    return equals_for_n(string, predicate, check_length);
+}
+
+static inline bool has_suffix_string(struct s_string* string, const char* predicate){
+    assert((string)->data[(string)->count] == '\0' && ((string)->count >= 0) && "[ERR]: Non null terminating data found");
+    unsigned int check_length = length_of_string(predicate), n = length_of_String(string);
+    assert((string)->count >= check_length && "[ERR]: Invalid Suffix length.");
+    unsigned int check_start = n - check_length, i = 0;
+    for(; check_start < n; check_start++, i++){
+        if ((string)->data[check_start] != predicate[i]){
+            return false;
+        }
+    }
+    return true;
 }
 
 #endif //STRING_H
