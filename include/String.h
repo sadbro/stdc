@@ -43,6 +43,32 @@ unsigned int length_of_string(const char* str){
     return _n;
 }
 
+struct s_string* from_string(const char* str){
+    unsigned int size = length_of_string(str) + 1 + sizeof(struct s_string), n = length_of_string(str);
+    struct s_string* p = (struct s_string*) calloc(1, size);
+    assert(p);
+    p->count = n;
+    copy(p->data, str, n);
+    return p;
+}
+
+struct s_string* get_owned_substring(struct s_string* string, unsigned int start, unsigned int end){
+    unsigned int n = length_of_String(string);
+    assert(end <= n && "[ERR]: Invalid Substring length.");
+    unsigned int substring_length = end - start;
+    struct s_string* p = (struct s_string*)calloc(1, substring_length + 1 + sizeof(struct s_string));
+    assert(p);
+    p->count = substring_length;
+    copy(p->data, (string)->data + start, substring_length);
+    p->data[p->count] = '\0';
+    return p;
+}
+
+static inline struct s_string* clone(struct s_string* information){
+    unsigned int n = length_of_String(information);
+    return get_owned_substring(information, 0, n);
+}
+
 int* get_lps_table(const char* pattern){
     unsigned int n = length_of_string(pattern);
     int* lps_table = (int*)calloc(n, sizeof(int));
@@ -66,27 +92,6 @@ int* get_lps_table(const char* pattern){
         }
     }
     return lps_table;
-}
-
-struct s_string* from_string(const char* str){
-    unsigned int size = length_of_string(str) + 1 + sizeof(struct s_string), n = length_of_string(str);
-    struct s_string* p = (struct s_string*) calloc(1, size);
-    assert(p);
-    p->count = n;
-    copy(p->data, str, n);
-    return p;
-}
-
-struct s_string* get_owned_substring(struct s_string* string, unsigned int start, unsigned int end){
-    unsigned int n = length_of_String(string);
-    assert(end < n && "[ERR]: Invalid Substring length.");
-    unsigned int substring_length = end - start;
-    struct s_string* p = (struct s_string*)calloc(1, substring_length + 1 + sizeof(struct s_string));
-    assert(p);
-    p->count = substring_length;
-    copy(p->data, (string)->data + start, substring_length);
-    p->data[p->count] = '\0';
-    return p;
 }
 
 bool concat_string(struct s_string* dst, const char* src){
@@ -339,6 +344,34 @@ void trim_char_from_right(struct s_string* string, const char delimiter){
 static inline void trim_char(struct s_string* string, const char delimiter){
     trim_char_from_right(string, delimiter);
     trim_char_from_left(string, delimiter);
+}
+
+static inline void trim(struct s_string* string){
+    trim_char(string, ' ');
+}
+
+static inline struct s_string* yield_owned_token(struct s_string* string, const char delimiter){
+    unsigned int n = length_of_String(string);
+    assert(n && n > 0 && "[ERR]: String exhausted.");
+    if (!contains_single(string, delimiter)){
+        return clone(string);
+    }
+    unsigned int i = 0;
+    char c;
+    for (; i < n; i++){
+        c = (string)->data[i];
+        if (c == delimiter){
+            char* dst = (char*)(string)->data + i;
+            struct s_string* substr = get_owned_substring(string, 0, i);
+            copy((string)->data, dst, (string)->count);
+            trim_char_from_left(string, delimiter);
+            (string)->data[(string)->count] = '\0';
+            return substr;
+        } else {
+            continue;
+        }
+    }
+    return NULL;
 }
 
 static inline bool has_prefix_string(struct s_string* string, const char* predicate){
