@@ -109,11 +109,11 @@ bool concat_string(struct s_string* dst, const char* src){
 
 bool equals_string(struct s_string* a, const char* b){
     unsigned int n = length_of_string(b);
-    if (n != a->count){
+    if (n != (a)->count){
         return false;
     }
     for(unsigned int i = 0; i < n; i++){
-        if (a->data[i] != b[i]){
+        if ((a)->data[i] != b[i]){
             return false;
         }
     }
@@ -365,6 +365,7 @@ static inline struct s_string* yield_owned_token(struct s_string* string, const 
             struct s_string* substr = get_owned_substring(string, 0, i);
             copy((string)->data, dst, (string)->count);
             trim_char_from_left(string, delimiter);
+            (string)->count = n - i - 1;
             (string)->data[(string)->count] = '\0';
             return substr;
         } else {
