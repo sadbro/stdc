@@ -374,6 +374,18 @@ static inline struct s_string* yield_owned_token(struct s_string* string, const 
     return NULL;
 }
 
+static inline struct s_string* get_owned_last_token(struct s_string* string, const char delimiter){
+    unsigned int n = length_of_String(string), i = n;
+    assert(n && n > 0 && "[ERR]: String exhausted.");
+    while(i > 0){
+        if ((string)->data[i] == delimiter){
+            return get_owned_substring(string, i + 1, n);
+        }
+        i--;
+    }
+    return string;
+}
+
 static inline bool has_prefix_string(struct s_string* string, const char* predicate){
     unsigned int check_length = length_of_string(predicate);
     assert((string)->count >= check_length && "[ERR]: Invalid Prefix length.");
