@@ -23,7 +23,6 @@ typedef struct s_string* String;
 #define $(x) from_string(x)
 #define $$(x) to_string(x)
 
-
 static inline unsigned int length_of_String(struct s_string* x) { return (x)-> count; }
 
 #define to_string(x) _Generic((x), String:_string, bool: _bool_to_string) (x)
@@ -92,6 +91,7 @@ static inline struct s_string* _ull_to_String(unsigned long long x){
 }
 
 static inline struct s_string* _ll_to_String(long long x){
+    // TODO: Not working for values less than INT_MIN but working for values larger than INT_MAX.
     if (x >= 0){
         return _ull_to_String(x);
     } else {
