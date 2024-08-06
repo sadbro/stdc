@@ -23,29 +23,6 @@ typedef struct s_string* String;
 #define $(x) from_string(x)
 #define $$(x) to_string(x)
 
-static inline const char* _bool_to_string(bool x) { return (x) ? "True" : "False"; }
-
-static inline const char* _string(struct s_string* x) { return (x)->data; }
-
-static inline char _uint_to_single(unsigned int x) {
-    assert(x < 10 && "[ERR]: Single conversion requires unsigned int values less than 10.");
-    return (char)('0' + x);
-}
-
-static inline struct s_string* _uint_to_String(unsigned int x){
-    unsigned int c = x;
-    unsigned int digits = (unsigned int)floor(log10((double)x)) + 1;
-    struct s_string* p = (struct s_string*)calloc(1, digits + 1 + sizeof(struct s_string));
-    assert(p);
-    p->count = digits;
-    p->data[0] = '0';
-    while (c > 0){
-        p->data[--digits] = _uint_to_single(c % 10);
-        c /= 10;
-    }
-    p->data[p->count] = '\0';
-    return p;
-}
 
 static inline unsigned int length_of_String(struct s_string* x) { return (x)-> count; }
 
@@ -74,6 +51,54 @@ struct s_string* from_string(const char* str){
     p->count = n;
     copy(p->data, str, n);
     return p;
+}
+
+
+bool concat_string(struct s_string* dst, const char* src){
+    unsigned int n = length_of_string(src), size;
+    struct s_string* p;
+    size = (dst->count + 1) + sizeof(struct s_string) + n;
+    p = (struct s_string*)realloc(dst, size);
+    if (!p){
+        return false;
+    }
+    copy(p->data + p->count, src, n);
+    p->count += n;
+    return true;
+}
+
+static inline const char* _bool_to_string(bool x) { return (x) ? "True" : "False"; }
+
+static inline const char* _string(struct s_string* x) { return (x)->data; }
+
+static inline char _uint_to_single(unsigned int x) {
+    assert(x < 10 && "[ERR]: Single conversion requires unsigned int values less than 10.");
+    return (char)('0' + x);
+}
+
+static inline struct s_string* _ull_to_String(unsigned long long x){
+    unsigned long long c = x;
+    unsigned int digits = (unsigned int)floor(log10((double)x)) + 1;
+    struct s_string* p = (struct s_string*)calloc(1, digits + 1 + sizeof(struct s_string));
+    assert(p);
+    p->count = digits;
+    p->data[0] = '0';
+    while (c > 0){
+        p->data[--digits] = _uint_to_single(c % 10);
+        c /= 10;
+    }
+    p->data[p->count] = '\0';
+    return p;
+}
+
+static inline struct s_string* _ll_to_String(long long x){
+    if (x >= 0){
+        return _ull_to_String(x);
+    } else {
+        struct s_string* _s = from_string("-");
+        concat_string(_s, _ull_to_String(-x)->data);
+        return _s;
+    }
 }
 
 struct s_string* get_owned_substring(struct s_string* string, unsigned int start, unsigned int end){
@@ -116,19 +141,6 @@ int* get_lps_table(const char* pattern){
         }
     }
     return lps_table;
-}
-
-bool concat_string(struct s_string* dst, const char* src){
-    unsigned int n = length_of_string(src), size;
-    struct s_string* p;
-    size = (dst->count + 1) + sizeof(struct s_string) + n;
-    p = (struct s_string*)realloc(dst, size);
-    if (!p){
-        return false;
-    }
-    copy(p->data + p->count, src, n);
-    p->count += n;
-    return true;
 }
 
 bool equals_string(struct s_string* a, const char* b){
