@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
+#include <math.h>
 
 #include "Hashes.h"
 
@@ -19,9 +20,32 @@ struct s_string {
 
 typedef struct s_string* String;
 
+#define $(x) from_string(x)
+#define $$(x) to_string(x)
+
 static inline const char* _bool_to_string(bool x) { return (x) ? "True" : "False"; }
 
 static inline const char* _string(struct s_string* x) { return (x)->data; }
+
+static inline char _uint_to_single(unsigned int x) {
+    assert(x < 10 && "[ERR]: Single conversion requires unsigned int values less than 10.");
+    return (char)('0' + x);
+}
+
+static inline struct s_string* _uint_to_String(unsigned int x){
+    unsigned int c = x;
+    unsigned int digits = (unsigned int)floor(log10((double)x)) + 1;
+    struct s_string* p = (struct s_string*)calloc(1, digits + 1 + sizeof(struct s_string));
+    assert(p);
+    p->count = digits;
+    p->data[0] = '0';
+    while (c > 0){
+        p->data[--digits] = _uint_to_single(c % 10);
+        c /= 10;
+    }
+    p->data[p->count] = '\0';
+    return p;
+}
 
 static inline unsigned int length_of_String(struct s_string* x) { return (x)-> count; }
 
@@ -323,7 +347,7 @@ static inline void convert_to_capitalcase(struct s_string* string){
     }
 }
 
-void trim_char_from_left(struct s_string* string, const char delimiter){
+unsigned int trim_char_from_left(struct s_string* string, const char delimiter){
     unsigned int i = -1;
     while(((string)->data[++i] == delimiter) && (string)->count){
         (string)->count--;
@@ -331,19 +355,20 @@ void trim_char_from_left(struct s_string* string, const char delimiter){
     char* dst = (char*)(string)->data + i;
     copy((string)->data, dst, (string)->count);
     (string)->data[(string)->count] = '\0';
+    return i;
 }
 
-void trim_char_from_right(struct s_string* string, const char delimiter){
-    unsigned int i = (string)->count;
+unsigned int trim_char_from_right(struct s_string* string, const char delimiter){
+    unsigned int i = (string)->count, n = i;
     while(((string)->data[--i] == delimiter) && (string)->count){
         (string)->count--;
     }
     (string)->data[(string)->count] = '\0';
+    return n - i;
 }
 
-static inline void trim_char(struct s_string* string, const char delimiter){
-    trim_char_from_right(string, delimiter);
-    trim_char_from_left(string, delimiter);
+static inline unsigned int trim_char(struct s_string* string, const char delimiter){
+    return trim_char_from_right(string, delimiter) + trim_char_from_left(string, delimiter);
 }
 
 static inline void trim(struct s_string* string){
@@ -364,8 +389,7 @@ static inline struct s_string* yield_owned_token(struct s_string* string, const 
             char* dst = (char*)(string)->data + i;
             struct s_string* substr = get_owned_substring(string, 0, i);
             copy((string)->data, dst, (string)->count);
-            trim_char_from_left(string, delimiter);
-            (string)->count = n - i - 1;
+            (string)->count = n - i - trim_char_from_left(string, delimiter);
             (string)->data[(string)->count] = '\0';
             return substr;
         } else {
