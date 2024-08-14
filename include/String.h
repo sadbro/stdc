@@ -278,6 +278,14 @@ static inline bool is_printable_ascii(const char c){
     return ((c >= 32) && (c <= 127));
 }
 
+static inline bool is_alphabetic_single(const char c){
+    assert(is_printable_ascii(c) && "[ERR] Non printable character encountered");
+    if (((c < 'A') || (c > 'Z')) && ((c < 'a') || (c > 'z'))){
+        return false;
+    }
+    return true;
+}
+
 static inline bool is_alphabetic(struct s_string* string){
     unsigned int n = (string)->count;
     for(unsigned int i = 0; i < n; i++){
@@ -387,7 +395,7 @@ static inline void trim(struct s_string* string){
     trim_char(string, ' ');
 }
 
-static inline struct s_string* yield_owned_token(struct s_string* string, const char delimiter){
+static inline struct s_string* yield_owned_substring(struct s_string* string, const char delimiter){
     unsigned int n = length_of_String(string);
     assert(n && n > 0 && "[ERR]: String exhausted.");
     if (!contains_single(string, delimiter)){
@@ -440,6 +448,31 @@ static inline bool has_suffix_string(struct s_string* string, const char* predic
         }
     }
     return true;
+}
+
+typedef struct {
+    String key_as_String;
+    String value_as_String;
+} KeyValuePair;
+
+KeyValuePair get_kv_owned(String pattern, String haystack){
+    unsigned int i = 1, n = pattern->count;
+    KeyValuePair kv;
+    for(; i < n; i++){
+        if ((pattern->data[i] == '{') && (pattern->data[i-1] == '$')){
+            unsigned int j = i + 1, k;
+            while ((pattern->data[j]) && (pattern->data[j] != '}')){
+                j++;
+            }
+            k = i + 1;
+            while ((haystack->data[k]) && (is_alphabetic_single(haystack->data[k]))){
+                k++;
+            }
+            kv.key_as_String = get_owned_substring(pattern, i + 1, j);
+            kv.value_as_String = get_owned_substring(haystack, i - 1, k);
+        }
+    }
+    return kv;
 }
 
 #endif //STRING_H
